@@ -24,11 +24,11 @@ export async function POST(request: Request) {
     });
 
     if (createUserError) {
-      return NextResponse.json({ error: createUserError.message }, { status: 400 });
+      return NextResponse.json({ error: createUserError.message, details: createUserError }, { status: 400 });
     }
 
-    if (!userResponse.user) {
-      return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    if (!userResponse || !userResponse.user) {
+      return NextResponse.json({ error: "Failed to create user (Response was null)", details: userResponse }, { status: 500 });
     }
 
     const roleTitleMap: Record<string, string> = {
