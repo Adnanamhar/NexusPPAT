@@ -51,12 +51,45 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
     documents.forEach((doc) => {
       if (doc.status === "awaiting_docs") {
         notifs.push({
-          id: `doc-${doc.id}`,
+          id: `doc-aw-${doc.id}`,
           title: "Kelengkapan Berkas",
-          message: `Akta ${doc.refNumber} (${doc.title}) menunggu berkas/KTP.`,
+          message: `Akta ${doc.refNumber} (${doc.title}) menunggu upload berkas/KTP.`,
           icon: AlertTriangle,
           color: "text-amber-500",
           bg: "bg-amber-50 dark:bg-amber-500/10",
+          time: new Date(doc.updatedAt),
+          href: `/files/${doc.id}`,
+        });
+      } else if (doc.status === "draft_review") {
+        notifs.push({
+          id: `doc-dr-${doc.id}`,
+          title: "Penelaahan Naskah",
+          message: `Draft akta ${doc.refNumber} baru diajukan dan menunggu review Anda.`,
+          icon: Bell,
+          color: "text-blue-500",
+          bg: "bg-blue-50 dark:bg-blue-500/10",
+          time: new Date(doc.createdAt),
+          href: `/files/${doc.id}`,
+        });
+      } else if (doc.status === "signature_pending") {
+        notifs.push({
+          id: `doc-sg-${doc.id}`,
+          title: "Jadwal Tanda Tangan",
+          message: `Akta ${doc.refNumber} siap ditandatangani. Segera jadwalkan pertemuan.`,
+          icon: AlertTriangle,
+          color: "text-purple-500",
+          bg: "bg-purple-50 dark:bg-purple-500/10",
+          time: new Date(doc.updatedAt),
+          href: `/files/${doc.id}`,
+        });
+      } else if (doc.status === "completed") {
+        notifs.push({
+          id: `doc-cm-${doc.id}`,
+          title: "Akta Selesai",
+          message: `Proses akta ${doc.refNumber} telah selesai seutuhnya.`,
+          icon: Bell,
+          color: "text-emerald-500",
+          bg: "bg-emerald-50 dark:bg-emerald-500/10",
           time: new Date(doc.updatedAt),
           href: `/files/${doc.id}`,
         });
@@ -78,7 +111,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
       }
     });
 
-    return notifs.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 5);
+    return notifs.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 10);
   }, [documents, payments]);
 
   const handleSearch = (e: React.FormEvent) => {
