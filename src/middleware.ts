@@ -1,7 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/register", "/forgot-password", "/reset-password", "/auth/callback"];
+const PUBLIC_ROUTES = [
+  "/login", 
+  "/register", 
+  "/forgot-password", 
+  "/reset-password", 
+  "/auth/callback",
+  "/api/auth/register",
+  "/api/auth/direct-reset"
+];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
