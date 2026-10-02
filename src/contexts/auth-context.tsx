@@ -213,64 +213,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email.trim(),
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            role: formData.role,
-          },
+      // 1. Call our custom API which uses Admin Role to auto-confirm the email
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+          fullName: formData.fullName,
+          role: formData.role,
+          phone: formData.phone,
+          skNumber: formData.skNumber,
+          officeName: formData.officeName,
+        }),
       });
 
-      if (error) {
-        if (error.message.includes("already registered")) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error?.includes("already registered")) {
           toast.error("Email ini sudah terdaftar. Silakan login.");
         } else {
-          toast.error(error.message);
+          toast.error(data.error || "Gagal melakukan pendaftaran");
         }
         return false;
       }
 
-      const roleTitleMap: Record<UserRole, string> = {
-        notaris: "Notaris & PPAT Utama",
-        admin: "Admin Kantor & Finance",
-        klien: "Klien / Pemohon",
-      };
-
-      const newUserProfile: UserProfile = {
-        id: data?.user?.id || `usr-${Date.now()}`,
-        email: formData.email,
-        fullName: formData.fullName,
-        role: formData.role,
-        roleTitle: roleTitleMap[formData.role],
-        phone: formData.phone,
-        skNumber: formData.skNumber,
-        officeName: formData.officeName,
-      };
-
-      // Insert into profiles table
-      if (data?.user) {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          email: formData.email,
-          full_name: formData.fullName,
-          role: formData.role,
-          role_title: roleTitleMap[formData.role],
-          sk_number: formData.skNumber,
-          phone: formData.phone,
-          office_name: formData.officeName,
-        });
+      // 2. Automatically log the user in since their email is now confirmed
+      const loginSuccess = await login(formData.email.trim(), formData.password);
+      
+      if (loginSuccess) {
+        toast.success("Pendaftaran berhasil! Akun Anda telah aktif.");
+        return true;
+      } else {
+        toast.error("Akun berhasil dibuat, namun gagal otomatis login.");
+        return false;
       }
-
-      setUser(newUserProfile);
-      setRole(formData.role);
-      setIsAuthenticated(true);
-      localStorage.setItem("notarispro_user", JSON.stringify(newUserProfile));
-      toast.success("Pendaftaran berhasil! Akun Anda telah aktif.");
-      router.push("/dashboard");
-      return true;
     } catch (err: any) {
       toast.error("Gagal melakukan pendaftaran. Periksa koneksi internet.");
       return false;

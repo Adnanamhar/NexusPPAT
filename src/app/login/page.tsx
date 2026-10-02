@@ -9,9 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ShieldCheck, Lock, Mail, ArrowRight, Sun, Moon, Sparkles, AlertCircle } from "lucide-react";
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
-export default function LoginPage() {
+const LoginPage = () => {
   const { login, isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState("");
@@ -45,12 +43,6 @@ export default function LoginPage() {
     if (!success) {
       setErrors((prev) => ({ ...prev, general: "Login gagal. Periksa email dan password Anda." }));
     }
-  };
-
-  const handleFillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("password123");
-    setErrors({});
   };
 
   return (
@@ -156,49 +148,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Demo Accounts Hint */}
-          <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                Kredensial Demo (Pilih Role)
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleFillDemo("notaris.hendrawan@notarispro.id")}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#080e1c] hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700/50 transition-all cursor-pointer group"
-              >
-                <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 mb-0.5">Notaris Utama</span>
-                <span className="text-[9px] text-slate-500 font-mono">Full Access</span>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => handleFillDemo("admin@notarispro.id")}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#080e1c] hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 dark:hover:border-emerald-700/50 transition-all cursor-pointer group"
-              >
-                <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 mb-0.5">Admin Kantor</span>
-                <span className="text-[9px] text-slate-500 font-mono">Manajemen</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleFillDemo("budi.santoso@gmail.com")}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#080e1c] hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-300 dark:hover:border-purple-700/50 transition-all cursor-pointer group"
-              >
-                <span className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 group-hover:text-purple-700 dark:group-hover:text-purple-400 mb-0.5">Klien / User</span>
-                <span className="text-[9px] text-slate-500 font-mono">Read-Only</span>
-              </button>
-            </div>
-            
-            <p className="text-[10px] text-center text-slate-500 dark:text-slate-400 mt-3 font-medium">
-              * Klik salah satu role di atas untuk login cepat
-            </p>
-          </div>
-
           {/* Registration Link */}
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <p className="text-xs text-slate-600 dark:text-slate-400">
@@ -216,4 +165,5 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+};
+export default LoginPage;
