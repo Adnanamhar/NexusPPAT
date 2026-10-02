@@ -119,19 +119,23 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const currentUserId = user?.id || "demo-client-user";
+    const profileKey = `notarispro_client_profile_${currentUserId}`;
+    const requestsKey = `notarispro_service_requests_${currentUserId}`;
+
     // Load saved client profile data from localStorage
-    const savedProfile = localStorage.getItem("notarispro_client_profile");
+    const savedProfile = localStorage.getItem(profileKey);
     let initialData = DEFAULT_CLIENT_DATA;
     if (savedProfile) {
       try {
         initialData = JSON.parse(savedProfile);
       } catch {}
     } else {
-      localStorage.setItem("notarispro_client_profile", JSON.stringify(DEFAULT_CLIENT_DATA));
+      localStorage.setItem(profileKey, JSON.stringify(DEFAULT_CLIENT_DATA));
     }
 
     // Load saved service requests
-    const savedRequests = localStorage.getItem("notarispro_service_requests");
+    const savedRequests = localStorage.getItem(requestsKey);
     if (savedRequests) {
       try {
         setServiceRequests(JSON.parse(savedRequests));
@@ -140,12 +144,12 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
       }
     } else {
       setServiceRequests(INITIAL_SERVICE_REQUESTS);
-      localStorage.setItem("notarispro_service_requests", JSON.stringify(INITIAL_SERVICE_REQUESTS));
+      localStorage.setItem(requestsKey, JSON.stringify(INITIAL_SERVICE_REQUESTS));
     }
 
     setClientData(initialData);
     setIsLoading(false);
-  }, []);
+  }, [user?.id]);
 
   // Sync with real Supabase Auth user whenever it changes
   useEffect(() => {
@@ -176,7 +180,9 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
         email: updates.email || user?.email || base.email,
         lastUpdated: new Date().toISOString(),
       };
-      localStorage.setItem("notarispro_client_profile", JSON.stringify(updated));
+      
+      const profileKey = `notarispro_client_profile_${user?.id || "demo-client-user"}`;
+      localStorage.setItem(profileKey, JSON.stringify(updated));
       return updated;
     });
   }, [user]);
@@ -233,7 +239,9 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
 
       const updatedRequests = [newRequest, ...serviceRequests];
       setServiceRequests(updatedRequests);
-      localStorage.setItem("notarispro_service_requests", JSON.stringify(updatedRequests));
+      
+      const requestsKey = `notarispro_service_requests_${user?.id || "demo-client-user"}`;
+      localStorage.setItem(requestsKey, JSON.stringify(updatedRequests));
 
       toast.success("Pengajuan layanan notaris berhasil terkirim!", {
         description: "Data diri Anda telah tersimpan otomatis untuk pengajuan berikutnya.",
@@ -249,10 +257,12 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
       const updated = prev.map((item) =>
         item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
       );
-      localStorage.setItem("notarispro_service_requests", JSON.stringify(updated));
+      
+      const requestsKey = `notarispro_service_requests_${user?.id || "demo-client-user"}`;
+      localStorage.setItem(requestsKey, JSON.stringify(updated));
       return updated;
     });
-  }, []);
+  }, [user]);
 
   const getServiceRequestById = useCallback(
     (id: string) => {

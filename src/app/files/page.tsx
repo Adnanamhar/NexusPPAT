@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SkeletonPage } from "@/components/ui/loading-skeleton";
 import { MODULE_GUIDES } from "@/lib/guides";
 import { useDocuments } from "@/contexts/document-context";
+import { useAuth } from "@/contexts/auth-context";
 import { formatCurrencyIDR } from "@/lib/cn";
 import {
   Plus,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 
 export default function FilesPage() {
+  const { user, role } = useAuth();
   const { documents, isLoading, error, loadDemoData } = useDocuments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -49,7 +51,15 @@ export default function FilesPage() {
     );
   }
 
-  const filteredDocs = documents.filter((doc) => {
+  const roleFilteredDocs = role === "klien"
+    ? documents.filter(d => 
+        d.clientUserId === user?.id || 
+        d.seller.email === user?.email || 
+        d.seller.nik === user?.skNumber
+      )
+    : documents;
+
+  const filteredDocs = roleFilteredDocs.filter((doc) => {
     const matchesSearch =
       doc.refNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

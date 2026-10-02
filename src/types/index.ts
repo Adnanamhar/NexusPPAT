@@ -96,6 +96,7 @@ export interface WorkflowStep {
 
 export interface LegalDocument {
   id: string;
+  clientUserId?: string;
   refNumber: string; // e.g. AJB-2023-089
   title: string;
   docType: DocumentType;

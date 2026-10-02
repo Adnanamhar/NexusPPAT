@@ -64,6 +64,7 @@ export default function ServiceRequestFormPage() {
       // Create official document in dashboard database
       await createDocument({
         title: `Permohonan: ${serviceInfo.title}`,
+        clientUserId: user?.id || clientData?.userId || "demo-client-user",
         docType: serviceInfo.code,
         docTypeLabel: serviceInfo.title,
         status: "draft_review",

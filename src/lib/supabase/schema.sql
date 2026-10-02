@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 2. Documents Table (Legal Matters & Deeds)
 CREATE TABLE IF NOT EXISTS public.documents (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  client_user_id UUID REFERENCES auth.users(id),
   ref_number TEXT NOT NULL UNIQUE,
   title TEXT NOT NULL,
   doc_type TEXT NOT NULL,

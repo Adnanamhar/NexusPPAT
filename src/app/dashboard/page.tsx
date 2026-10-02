@@ -37,10 +37,19 @@ export default function DashboardPage() {
   const { user, role } = useAuth();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
+  // Filter documents based on role to prevent data leakage
+  const filteredDocs = role === "klien"
+    ? documents.filter(d => 
+        d.clientUserId === user?.id || 
+        d.seller.email === user?.email || 
+        d.seller.nik === user?.skNumber
+      )
+    : documents;
+
   // Real data calculations
-  const totalCount = documents.length;
-  const activeCount = documents.filter((d) => d.status !== "completed").length;
-  const completedCount = documents.filter((d) => d.status === "completed").length;
+  const totalCount = filteredDocs.length;
+  const activeCount = filteredDocs.filter((d) => d.status !== "completed").length;
+  const completedCount = filteredDocs.filter((d) => d.status === "completed").length;
   
   // Calculate total revenue from paid payments
   const totalRevenue = payments
@@ -270,8 +279,8 @@ export default function DashboardPage() {
 
                 <div className="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 relative z-10">
                   <span>Status Operasional: <strong className="text-slate-700 dark:text-slate-200">Aktif & Terenkripsi AES-256</strong></span>
-                  {documents.length > 0 && (
-                    <Link href={`/files/${documents[0].id}`} className="text-blue-600 dark:text-blue-400 hover:underline font-bold flex items-center gap-1">
+                  {filteredDocs.length > 0 && (
+                    <Link href={`/files/${filteredDocs[0].id}`} className="text-blue-600 dark:text-blue-400 hover:underline font-bold flex items-center gap-1">
                       <span>Buka Berkas Terakhir</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
@@ -315,7 +324,7 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#152442] text-xs font-medium">
-                      {documents.slice(0, 5).map((doc) => {
+                      {filteredDocs.slice(0, 5).map((doc) => {
                         // Logic for displaying 'Hari Ini' if due date is today. Simple check:
                         const isToday = new Date(doc.dueDate).toDateString() === new Date().toDateString();
 

@@ -28,6 +28,7 @@ export async function fetchDocumentsFromDB(): Promise<LegalDocument[] | null> {
     // Map snake_case DB columns to camelCase LegalDocument
     return data.map((doc: any) => ({
       id: doc.id,
+      clientUserId: doc.client_user_id,
       refNumber: doc.ref_number,
       title: doc.title,
       docType: doc.doc_type,
@@ -123,6 +124,7 @@ export async function insertDocumentToDB(doc: LegalDocument): Promise<boolean> {
     const { data: insertedDoc, error: docError } = await supabase
       .from("documents")
       .insert({
+        client_user_id: doc.clientUserId || null,
         ref_number: doc.refNumber,
         title: doc.title,
         doc_type: doc.docType,

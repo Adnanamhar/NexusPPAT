@@ -188,6 +188,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     const refNumber = newDoc.refNumber || `AJB-2026-${Math.floor(100 + Math.random() * 900)}`;
     const fullDoc: LegalDocument = {
       id: randomId,
+      clientUserId: newDoc.clientUserId,
       refNumber,
       title: newDoc.title || "Akta Jual Beli Baru",
       docType: newDoc.docType || "akta_jual_beli",

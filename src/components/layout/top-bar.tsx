@@ -32,6 +32,9 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Need to get role from auth context to filter properly
+  const { role } = useAuth();
 
   // Contextual greeting based on current time
   const getGreeting = () => {
@@ -48,7 +51,17 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
   const notifications = useMemo(() => {
     const notifs: any[] = [];
-    documents.forEach((doc) => {
+    
+    // Filter by role to prevent data leakage in notifications
+    const myDocuments = role === "klien" 
+      ? documents.filter(d => d.clientUserId === user?.id || d.seller.email === user?.email || d.seller.nik === user?.skNumber) 
+      : documents;
+      
+    const myPayments = role === "klien"
+      ? payments.filter(p => myDocuments.some(d => d.refNumber === p.documentRef))
+      : payments;
+
+    myDocuments.forEach((doc) => {
       if (doc.status === "awaiting_docs") {
         notifs.push({
           id: `doc-aw-${doc.id}`,
@@ -96,7 +109,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
       }
     });
 
-    payments.forEach((payment) => {
+    myPayments.forEach((payment) => {
       if (payment.status === "Unpaid") {
         notifs.push({
           id: `pay-${payment.id}`,
