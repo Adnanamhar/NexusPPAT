@@ -279,47 +279,47 @@ export function autoFillServiceForm(
         sellerPhone: baseData.phone,
         sellerEmail: baseData.email,
         sellerNpwp: baseData.npwp,
-        buyerName: client.spouseName || "Siti Aminah",
-        buyerNik: client.spouseNik || "3201987654320002",
-        buyerAddress: "Jl. Merdeka Raya Kav. 12, Bandung",
-        certificateType: "Hak Milik (SHM)",
-        certificateNumber: "SHM No. 12345",
-        landArea: "250",
-        buildingArea: "180",
-        location: "Kecamatan Kebayoran Baru",
-        city: "Jakarta Selatan",
-        province: "DKI Jakarta",
-        transactionPrice: "5500000000",
-        njopPrice: "4200000000",
-        agreementDate: new Date().toISOString().split("T")[0],
-        paymentMethod: "Escrow / Rekening Penampung Notaris",
+        buyerName: client.spouseName || "",
+        buyerNik: client.spouseNik || "",
+        buyerAddress: "",
+        certificateType: "Hak Milik (SHM)", // This can stay as a sensible default dropdown value
+        certificateNumber: "",
+        landArea: "",
+        buildingArea: "",
+        location: "",
+        city: "",
+        province: "",
+        transactionPrice: "",
+        njopPrice: "",
+        agreementDate: new Date().toISOString().split("T")[0], // Sensible default
+        paymentMethod: "",
       };
 
     case "pendirian_badan_usaha":
       return {
-        companyNameProposed: client.companyName || "PT Nusantara Karya Utama",
+        companyNameProposed: client.companyName || "",
         companyAddress: client.companyAddress || baseData.address,
-        authorizedCapital: "1000000000",
-        paidUpCapital: "250000000",
+        authorizedCapital: "",
+        paidUpCapital: "",
         founder1Name: baseData.fullName,
         founder1Nik: baseData.nik,
-        founder1Shares: "60",
-        founder2Name: client.spouseName || "Siti Aminah",
-        founder2Nik: client.spouseNik || "3201987654320002",
-        founder2Shares: "40",
+        founder1Shares: "",
+        founder2Name: client.spouseName || "",
+        founder2Nik: client.spouseNik || "",
+        founder2Shares: "",
         directorName: baseData.fullName,
-        commissionerName: client.spouseName || "Siti Aminah",
-        businessSector: "Perdagangan Umum & Jasa Konsultasi",
+        commissionerName: client.spouseName || "",
+        businessSector: "",
       };
 
     case "perjanjian_kawin":
       return {
         husbandName: baseData.fullName,
         husbandNik: baseData.nik,
-        wifeName: client.spouseName || "Siti Aminah",
-        wifeNik: client.spouseNik || "3201987654320002",
+        wifeName: client.spouseName || "",
+        wifeNik: client.spouseNik || "",
         marriageDateTarget: new Date().toISOString().split("T")[0],
-        separatedAssetDetails: "Rumah di Kebayoran Baru, Tabungan BCA, dan Saham PT.",
+        separatedAssetDetails: "",
       };
 
     case "akta_hibah":
@@ -327,14 +327,14 @@ export function autoFillServiceForm(
         grantorName: baseData.fullName,
         grantorNik: baseData.nik,
         grantorAddress: baseData.address,
-        recipientName: client.spouseName || "Anak Kandung",
-        recipientNik: client.spouseNik || "3171000998877665",
-        recipientAddress: baseData.address,
-        relationship: "Orang Tua ke Anak",
-        certificateNumber: "SHM No. 98765",
-        landArea: "150",
-        location: "Kebayoran Baru",
-        city: "Jakarta Selatan",
+        recipientName: client.spouseName || "",
+        recipientNik: client.spouseNik || "",
+        recipientAddress: baseData.address, // Usually child/family, decent fallback
+        relationship: "",
+        certificateNumber: "",
+        landArea: "",
+        location: "",
+        city: "",
       };
 
     case "surat_kuasa":
@@ -342,9 +342,9 @@ export function autoFillServiceForm(
         principalName: baseData.fullName,
         principalNik: baseData.nik,
         principalAddress: baseData.address,
-        attorneyName: "Bambang Setiawan, S.H.",
-        attorneyNik: "3175098761230004",
-        authorizedAction: "Menjual dan menandatangani Akta Jual Beli atas tanah SHM No. 12345",
+        attorneyName: "",
+        attorneyNik: "",
+        authorizedAction: "",
       };
 
     default:
