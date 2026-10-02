@@ -25,13 +25,13 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
 
   // Form states
-  const [fullName, setFullName] = useState(user?.fullName || "Dr. Hendrawan Kartasasmita, S.H., M.Kn.");
-  const [skNumber, setSkNumber] = useState(user?.skNumber || "SK Menkumham No. AHU-0019283.AH.02.01");
-  const [skPpat, setSkPpat] = useState("SK Kepala BPN RI No. 12/KEP-BPN/PPAT/2019");
-  const [phone, setPhone] = useState(user?.phone || "+62 811-9876-5432");
-  const [officeName, setOfficeName] = useState(user?.officeName || "Kantor Notaris & PPAT Hendrawan, S.H., M.Kn.");
-  const [officeAddress, setOfficeAddress] = useState("Sudirman Central Business District (SCBD) Tower 1 Lt. 8, Jakarta Selatan");
-  const [escrowBank, setEscrowBank] = useState("BCA Cabang Sudirman - No. Rek: 012-9988-7711 a.n. Escrow Notaris Hendrawan");
+  const [fullName, setFullName] = useState(user?.fullName || (role === "klien" ? "" : "Dr. Hendrawan Kartasasmita, S.H., M.Kn."));
+  const [skNumber, setSkNumber] = useState(user?.skNumber || (role === "klien" ? "" : "SK Menkumham No. AHU-0019283.AH.02.01"));
+  const [skPpat, setSkPpat] = useState(role === "klien" ? "" : "SK Kepala BPN RI No. 12/KEP-BPN/PPAT/2019");
+  const [phone, setPhone] = useState(user?.phone || (role === "klien" ? "" : "+62 811-9876-5432"));
+  const [officeName, setOfficeName] = useState(user?.officeName || (role === "klien" ? "" : "Kantor Notaris & PPAT Hendrawan, S.H., M.Kn."));
+  const [officeAddress, setOfficeAddress] = useState(role === "klien" ? "" : "Sudirman Central Business District (SCBD) Tower 1 Lt. 8, Jakarta Selatan");
+  const [escrowBank, setEscrowBank] = useState(role === "klien" ? "" : "BCA Cabang Sudirman - No. Rek: 012-9988-7711 a.n. Escrow Notaris Hendrawan");
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
