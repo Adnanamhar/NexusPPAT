@@ -25,7 +25,6 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   
   const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
@@ -36,7 +35,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError("");
 
-    if (!email.trim() || !fullName.trim() || !newPassword) {
+    if (!email.trim() || !newPassword) {
       setError("Semua kolom wajib diisi.");
       return;
     }
@@ -58,7 +57,6 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim(),
-          fullName: fullName.trim(),
           newPassword,
         }),
       });
@@ -127,7 +125,7 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 rounded-xl p-3 mb-2">
               <p className="text-xs text-blue-800 dark:text-blue-300">
-                <strong>Verifikasi Keamanan:</strong> Kami mencocokkan Email dan Nama Lengkap dengan database.
+                <strong>Pemulihan Langsung:</strong> Masukkan Email Anda dan buat kata sandi baru.
               </p>
             </div>
 
@@ -145,18 +143,7 @@ export default function ForgotPasswordPage() {
               autoComplete="email"
             />
 
-            <Input
-              label="Nama Lengkap Terdaftar"
-              type="text"
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="Nama lengkap sesuai pendaftaran"
-              leftIcon={<User className="w-4 h-4" />}
-              required
-            />
+
 
             <div className="h-px w-full bg-slate-100 dark:bg-slate-800 my-4" />
 

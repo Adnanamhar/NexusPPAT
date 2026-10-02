@@ -12,24 +12,37 @@ export async function POST(request: Request) {
 
     const adminAuthClient = createAdminClient();
 
-    // Verify user by email and full name in profiles table
-    const { data: profile, error: profileError } = await adminAuthClient
+    // Verify user by email in profiles table first
+    let userId = null;
+    const { data: profile } = await adminAuthClient
       .from("profiles")
-      .select("id, email, full_name")
-      .eq("email", email.trim())
-      .eq("full_name", fullName.trim())
-      .single();
+      .select("id")
+      .ilike("email", email.trim())
+      .maybeSingle();
 
-    if (profileError || !profile) {
+    if (profile?.id) {
+      userId = profile.id;
+    } else {
+      // Fallback: search in auth.users directly if profile is missing
+      const { data: usersData } = await adminAuthClient.auth.admin.listUsers();
+      const foundUser = usersData?.users?.find(
+        (u) => u.email?.toLowerCase() === email.trim().toLowerCase()
+      );
+      if (foundUser) {
+        userId = foundUser.id;
+      }
+    }
+
+    if (!userId) {
       return NextResponse.json(
-        { error: "Verifikasi gagal. Pastikan Email dan Nama Lengkap yang Anda masukkan cocok dengan yang terdaftar." },
+        { error: "Verifikasi gagal. Alamat Email tidak ditemukan di sistem kami." },
         { status: 404 }
       );
     }
 
     // Update password using Admin API (bypassing email links)
     const { error: updateError } = await adminAuthClient.auth.admin.updateUserById(
-      profile.id,
+      userId,
       { password: newPassword }
     );
 
