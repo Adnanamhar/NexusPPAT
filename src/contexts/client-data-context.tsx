@@ -121,14 +121,12 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     // Load saved client profile data from localStorage
     const savedProfile = localStorage.getItem("notarispro_client_profile");
+    let initialData = DEFAULT_CLIENT_DATA;
     if (savedProfile) {
       try {
-        setClientData(JSON.parse(savedProfile));
-      } catch {
-        setClientData(DEFAULT_CLIENT_DATA);
-      }
+        initialData = JSON.parse(savedProfile);
+      } catch {}
     } else {
-      setClientData(DEFAULT_CLIENT_DATA);
       localStorage.setItem("notarispro_client_profile", JSON.stringify(DEFAULT_CLIENT_DATA));
     }
 
@@ -145,8 +143,27 @@ export function ClientDataProvider({ children }: { children: React.ReactNode }) 
       localStorage.setItem("notarispro_service_requests", JSON.stringify(INITIAL_SERVICE_REQUESTS));
     }
 
+    setClientData(initialData);
     setIsLoading(false);
   }, []);
+
+  // Sync with real Supabase Auth user whenever it changes
+  useEffect(() => {
+    if (user) {
+      setClientData((prev) => {
+        const base = prev || DEFAULT_CLIENT_DATA;
+        return {
+          ...base,
+          userId: user.id,
+          fullName: user.fullName || base.fullName,
+          nik: user.skNumber || base.nik,
+          registeredAddress: user.officeName || base.registeredAddress,
+          phone: user.phone || base.phone,
+          email: user.email || base.email,
+        };
+      });
+    }
+  }, [user]);
 
   const saveClientData = useCallback((updates: Partial<ClientProfileData>) => {
     setClientData((prev) => {
