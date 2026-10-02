@@ -27,30 +27,56 @@ export default function RegisterPage() {
   const validate = (): boolean => {
     const newErrors: Record<string, string | undefined> = {};
 
-    if (!fullName.trim()) newErrors.fullName = "Nama lengkap wajib diisi.";
+    // Nama lengkap: minimal 3 karakter, maksimal 100 karakter
+    if (!fullName.trim()) {
+      newErrors.fullName = "Nama lengkap wajib diisi.";
+    } else if (fullName.trim().length < 3) {
+      newErrors.fullName = "Nama lengkap minimal 3 karakter.";
+    } else if (fullName.trim().length > 100) {
+      newErrors.fullName = "Nama lengkap maksimal 100 karakter.";
+    }
     
+    // Email: format standar
     if (!email.trim()) {
       newErrors.email = "Alamat email wajib diisi.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Format email tidak valid.";
     }
 
-    if (!phone.trim()) newErrors.phone = "Nomor telepon wajib diisi.";
+    // Nomor telepon: hanya angka, 10-13 digit
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!phone.trim()) {
+      newErrors.phone = "Nomor telepon wajib diisi.";
+    } else if (!/^\d+$/.test(phoneDigits)) {
+      newErrors.phone = "Nomor telepon hanya boleh berisi angka.";
+    } else if (phoneDigits.length < 10) {
+      newErrors.phone = "Nomor telepon minimal 10 digit.";
+    } else if (phoneDigits.length > 13) {
+      newErrors.phone = "Nomor telepon maksimal 13 digit.";
+    }
     
+    // Nomor SK: wajib untuk Notaris
     if (selectedRole === "notaris" && !skNumber.trim()) {
       newErrors.skNumber = "Nomor SK wajib diisi untuk Notaris.";
     }
 
+    // Nama kantor / domisili: minimal 3 karakter
     if (!officeName.trim()) {
       newErrors.officeName = selectedRole === "klien" ? "Domisili wajib diisi." : "Nama kantor wajib diisi.";
+    } else if (officeName.trim().length < 3) {
+      newErrors.officeName = "Minimal 3 karakter.";
     }
 
+    // Password: minimal 6 karakter, maksimal 128 karakter
     if (!password) {
       newErrors.password = "Password wajib diisi.";
     } else if (password.length < 6) {
       newErrors.password = "Password minimal 6 karakter.";
+    } else if (password.length > 128) {
+      newErrors.password = "Password maksimal 128 karakter.";
     }
 
+    // Konfirmasi password
     if (password !== confirmPassword) {
       newErrors.confirmPassword = "Konfirmasi kata sandi tidak cocok.";
     }
