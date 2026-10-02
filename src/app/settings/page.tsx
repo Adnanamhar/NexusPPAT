@@ -78,6 +78,8 @@ export default function SettingsPage() {
                   label="NAMA LENGKAP (SESUAI KTP)"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  minLength={3}
+                  maxLength={50}
                   required
                 />
                 <Input
@@ -86,6 +88,9 @@ export default function SettingsPage() {
                   placeholder="16 Digit NIK"
                   onChange={(e) => setSkNumber(e.target.value)}
                   maxLength={16}
+                  minLength={16}
+                  pattern="[0-9]*"
+                  title="NIK harus berupa 16 digit angka"
                   required
                 />
               </div>
@@ -95,6 +100,7 @@ export default function SettingsPage() {
                 value={officeName} 
                 onChange={(e) => setOfficeName(e.target.value)}
                 rows={3}
+                minLength={10}
                 required
               />
 
@@ -103,12 +109,19 @@ export default function SettingsPage() {
                   label="NOMOR TELEPON / WHATSAPP AKTIF"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  maxLength={13}
+                  minLength={10}
+                  pattern="[0-9]*"
+                  title="Nomor telepon harus berupa 10-13 digit angka"
                   required
                 />
                 <Input
                   label="NOMOR NPWP PRIBADI (OPSIONAL)"
                   value={skPpat}
                   onChange={(e) => setSkPpat(e.target.value)}
+                  maxLength={16}
+                  minLength={15}
+                  pattern="[0-9.-]*"
                 />
               </div>
 

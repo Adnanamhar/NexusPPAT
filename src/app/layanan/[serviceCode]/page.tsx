@@ -140,6 +140,8 @@ export default function ServiceRequestFormPage() {
                     handleChange("husbandName", val);
                     handleChange("founder1Name", val);
                   }}
+                  minLength={3}
+                  maxLength={50}
                   required
                 />
                 <Input
@@ -154,6 +156,9 @@ export default function ServiceRequestFormPage() {
                     handleChange("founder1Nik", val);
                   }}
                   maxLength={16}
+                  minLength={16}
+                  pattern="[0-9]*"
+                  title="NIK harus berupa 16 digit angka"
                   required
                 />
               </div>
@@ -168,6 +173,7 @@ export default function ServiceRequestFormPage() {
                   handleChange("grantorAddress", val);
                 }}
                 rows={2}
+                minLength={10}
                 required
               />
 
@@ -179,6 +185,10 @@ export default function ServiceRequestFormPage() {
                     handleChange("phone", e.target.value);
                     handleChange("sellerPhone", e.target.value);
                   }}
+                  maxLength={13}
+                  minLength={10}
+                  pattern="[0-9]*"
+                  title="Nomor telepon harus berupa 10-13 digit angka"
                   required
                 />
                 <Input
@@ -188,6 +198,9 @@ export default function ServiceRequestFormPage() {
                     handleChange("npwp", e.target.value);
                     handleChange("sellerNpwp", e.target.value);
                   }}
+                  maxLength={16}
+                  minLength={15}
+                  pattern="[0-9.-]*"
                 />
               </div>
             </div>
@@ -205,6 +218,8 @@ export default function ServiceRequestFormPage() {
                     label="NAMA LENGKAP PEMBELI"
                     value={formData.buyerName || ""}
                     onChange={(e) => handleChange("buyerName", e.target.value)}
+                    minLength={3}
+                    maxLength={50}
                     required
                   />
                   <Input
@@ -212,6 +227,9 @@ export default function ServiceRequestFormPage() {
                     value={formData.buyerNik || ""}
                     onChange={(e) => handleChange("buyerNik", e.target.value)}
                     maxLength={16}
+                    minLength={16}
+                    pattern="[0-9]*"
+                    title="NIK harus berupa 16 digit angka"
                     required
                   />
                 </div>
@@ -231,6 +249,7 @@ export default function ServiceRequestFormPage() {
                   <Input
                     label="LUAS TANAH (M²)"
                     type="number"
+                    min="1"
                     value={formData.landArea || ""}
                     onChange={(e) => handleChange("landArea", e.target.value)}
                     required
@@ -241,6 +260,7 @@ export default function ServiceRequestFormPage() {
                   <Input
                     label="NILAI TRANSAKSI KESEPAKATAN (RP)"
                     type="number"
+                    min="1000000"
                     value={formData.transactionPrice || ""}
                     onChange={(e) => handleChange("transactionPrice", e.target.value)}
                     required
@@ -282,6 +302,7 @@ export default function ServiceRequestFormPage() {
                   <Input
                     label="MODAL DASAR PERSEROAN (RP)"
                     type="number"
+                    min="50000000" // Batas minimal pembuatan PT sesuai UU PT terbaru (default convention)
                     placeholder="1000000000"
                     value={formData.authorizedCapital || ""}
                     onChange={(e) => handleChange("authorizedCapital", e.target.value)}
@@ -290,6 +311,7 @@ export default function ServiceRequestFormPage() {
                   <Input
                     label="MODAL DISETOR / DISETOR AWAL (RP)"
                     type="number"
+                    min="12500000" // Minimal 25% dari modal dasar 50jt
                     placeholder="250000000"
                     value={formData.paidUpCapital || ""}
                     onChange={(e) => handleChange("paidUpCapital", e.target.value)}
