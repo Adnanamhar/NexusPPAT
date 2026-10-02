@@ -4,9 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, fullName, newPassword } = body;
+    const { email, newPassword } = body;
 
-    if (!email || !fullName || !newPassword) {
+    if (!email || !newPassword) {
       return NextResponse.json({ error: "Semua kolom wajib diisi" }, { status: 400 });
     }
 
