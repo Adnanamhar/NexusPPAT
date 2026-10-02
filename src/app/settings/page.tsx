@@ -43,6 +43,88 @@ export default function SettingsPage() {
     });
   };
 
+  if (role === "klien") {
+    return (
+      <AppLayout>
+        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-16">
+          <div className="pt-2">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Pengaturan Profil
+            </h1>
+            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Perbarui identitas diri (NIK, alamat) untuk mempercepat pengisian otomatis saat mengajukan layanan akta.
+            </p>
+          </div>
+
+          <Card className="p-8 shadow-sm">
+            <form onSubmit={handleSave} className="space-y-6">
+              <div className="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-purple-500/40 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={user?.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"}
+                    alt="Klien Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100">{fullName}</h3>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold">Klien / Pemohon</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input
+                  label="NAMA LENGKAP (SESUAI KTP)"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+                <Input
+                  label="NOMOR INDUK KEPENDUDUKAN (NIK)"
+                  value={skNumber}
+                  placeholder="16 Digit NIK"
+                  onChange={(e) => setSkNumber(e.target.value)}
+                  maxLength={16}
+                  required
+                />
+              </div>
+
+              <Textarea
+                label="ALAMAT DOMISILI (SESUAI KTP)"
+                value={officeName} 
+                onChange={(e) => setOfficeName(e.target.value)}
+                rows={3}
+                required
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Input
+                  label="NOMOR TELEPON / WHATSAPP AKTIF"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+                <Input
+                  label="NOMOR NPWP PRIBADI (OPSIONAL)"
+                  value={skPpat}
+                  onChange={(e) => setSkPpat(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button type="submit" variant="glow" className="bg-purple-600 hover:bg-purple-700 shadow-purple-500/30">
+                  <Save className="w-4 h-4 mr-1.5" />
+                  <span>Simpan Profil Klien</span>
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-6 animate-fade-in pb-16">
