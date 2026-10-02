@@ -171,7 +171,7 @@ export default function AdminDocumentStudioPage() {
                 <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-500/30 px-2 py-0.5 rounded">
                   {request.refNumber}
                 </span>
-                <Badge variant="primary">{request.serviceTitle}</Badge>
+                <Badge variant="default">{request.serviceTitle}</Badge>
               </div>
               <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">
                 Admin Document Studio Notaris

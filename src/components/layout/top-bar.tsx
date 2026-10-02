@@ -72,7 +72,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           icon: CreditCard,
           color: "text-red-500",
           bg: "bg-red-50 dark:bg-red-500/10",
-          time: new Date(payment.createdAt || Date.now() - 3600000),
+          time: new Date(payment.paidAt || payment.dueDate || Date.now() - 3600000),
           href: `/payments`,
         });
       }

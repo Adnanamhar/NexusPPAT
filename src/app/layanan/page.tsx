@@ -209,7 +209,7 @@ export default function ServiceCatalogPage() {
                     Klik pengajuan untuk membuka Admin Document Studio (Preview, Editor Data Kurang, & Export PDF/Word).
                   </p>
                 </div>
-                <Badge variant="primary">{serviceRequests.length} Pengajuan</Badge>
+                <Badge variant="default">{serviceRequests.length} Pengajuan</Badge>
               </div>
 
               <div className="overflow-x-auto">
