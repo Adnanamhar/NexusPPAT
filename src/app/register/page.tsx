@@ -248,7 +248,16 @@ export default function RegisterPage() {
                 label="Nomor WhatsApp / Telepon"
                 value={phone}
                 onChange={(e) => {
-                  setPhone(e.target.value);
+                  let raw = e.target.value.replace(/\D/g, "");
+                  if (raw.length > 13) raw = raw.slice(0, 13);
+                  
+                  let formatted = "";
+                  for (let i = 0; i < raw.length; i++) {
+                    if (i > 0 && i % 4 === 0) formatted += "-";
+                    formatted += raw[i];
+                  }
+
+                  setPhone(formatted);
                   if (errors.phone) setErrors((p) => ({ ...p, phone: undefined }));
                 }}
                 placeholder="0812-3456-7890"
