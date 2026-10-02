@@ -14,7 +14,7 @@ const jakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Notaris Pro — Digital Legal Suite",
+  title: "Nexus PPAT — Digital Legal Suite",
   description: "Platform Manajemen Dokumen, Akta, Verifikasi Klien & Billing Kantor Notaris / PPAT Terpadu",
 };
 

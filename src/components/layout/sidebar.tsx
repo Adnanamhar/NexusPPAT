@@ -72,7 +72,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 </div>
                 <div>
                   <h1 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    Notaris Pro
+                    Nexus PPAT
                   </h1>
                   <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 tracking-[0.2em] uppercase mt-1 block">
                     LEGAL SUITE
@@ -151,7 +151,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
         title="Konfirmasi Keluar"
-        description="Apakah Anda yakin ingin keluar dari sistem Notaris Pro?"
+        description="Apakah Anda yakin ingin keluar dari sistem Nexus PPAT?"
         maxWidth="sm"
       >
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

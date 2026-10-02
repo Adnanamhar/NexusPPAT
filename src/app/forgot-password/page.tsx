@@ -198,7 +198,7 @@ export default function ForgotPasswordPage() {
         </Card>
 
         <p className="text-center text-xs text-slate-400 mt-8">
-          © 2026 NexusPPAT — Sistem Manajemen Notaris & PPAT Terpadu.
+          © 2026 Nexus PPAT — Sistem Manajemen Notaris & PPAT Terpadu.
         </p>
       </div>
     </div>

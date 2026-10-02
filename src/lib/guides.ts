@@ -125,7 +125,7 @@ export const MODULE_GUIDES: Record<string, ModuleGuide> = {
       { title: "2. Kirim Tiket", desc: "Isi form di bagian bawah jika Anda memerlukan bantuan teknis aplikasi atau konsultasi implementasi." },
     ],
     tips: [
-      "Tim bantuan teknis Notaris Pro beroperasi Senin – Jumat pukul 08.00 – 17.00 WIB.",
+      "Tim bantuan teknis Nexus PPAT beroperasi Senin – Jumat pukul 08.00 – 17.00 WIB.",
     ],
   },
 };

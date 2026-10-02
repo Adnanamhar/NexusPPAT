@@ -564,7 +564,7 @@ export default function PaymentsPage() {
 
               <div className="pt-6 flex justify-between items-end font-sans text-xs relative z-10">
                 <div className="w-24 h-24 rounded-full border-2 border-dashed border-blue-900/40 flex items-center justify-center text-[10px] font-bold text-blue-900/60 uppercase text-center p-2 transform -rotate-12 bg-white/50 backdrop-blur-sm">
-                  LUNAS<br />NOTARIS PRO
+                  LUNAS<br />NEXUS PPAT
                 </div>
 
                 <div className="text-center">

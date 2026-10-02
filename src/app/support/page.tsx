@@ -49,7 +49,7 @@ export default function SupportPage() {
       return;
     }
     toast.success("Tiket bantuan teknis berhasil dikirim!", {
-      description: "Tim teknis Notaris Pro akan menghubungi Anda dalam waktu 15 menit.",
+      description: "Tim teknis Nexus PPAT akan menghubungi Anda dalam waktu 15 menit.",
     });
     setTicketSubject("");
     setTicketMessage("");
@@ -67,7 +67,7 @@ export default function SupportPage() {
             Pusat Bantuan & Panduan Hukum
           </h1>
           <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Panduan operasional sistem Notaris Pro, regulasi PPAT, dan layanan dukungan teknis 24/7.
+            Panduan operasional sistem Nexus PPAT, regulasi PPAT, dan layanan dukungan teknis 24/7.
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export default function SupportPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.success("Membuka chat WhatsApp Support Notaris Pro (+62 811-9988-7766)")}
+              onClick={() => toast.success("Membuka chat WhatsApp Support Nexus PPAT (+62 811-9988-7766)")}
               className="mt-4 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/40"
             >
               <span>Chat WhatsApp</span>

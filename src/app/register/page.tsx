@@ -131,7 +131,7 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/25 mb-4 border border-blue-400/30">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Daftar Notaris Pro</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Daftar Nexus PPAT</h1>
           <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-[0.25em] mt-1">
             PEMBUATAN AKUN BARU
           </p>

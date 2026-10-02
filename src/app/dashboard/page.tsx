@@ -448,7 +448,7 @@ export default function DashboardPage() {
             <Button
               variant="glow"
               onClick={() => {
-                toast.success("Permintaan upgrade telah dikirim ke tim billing Notaris Pro!");
+                toast.success("Permintaan upgrade telah dikirim ke tim billing Nexus PPAT!");
                 setUpgradeModalOpen(false);
               }}
             >
