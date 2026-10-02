@@ -283,12 +283,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("notarispro_user", JSON.stringify(updated));
 
     try {
-      await supabase.from("profiles").update({
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        role_title: user.roleTitle,
         full_name: updated.fullName,
         sk_number: updated.skNumber,
         phone: updated.phone,
         office_name: updated.officeName,
-      }).eq("id", user.id);
+      });
       toast.success("Profil berhasil diperbarui!");
     } catch {
       toast.error("Gagal menyimpan profil ke server.");
