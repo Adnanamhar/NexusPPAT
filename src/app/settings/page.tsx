@@ -109,10 +109,10 @@ export default function SettingsPage() {
                   label="NOMOR TELEPON / WHATSAPP AKTIF"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  maxLength={13}
+                  maxLength={20}
                   minLength={10}
-                  pattern="[0-9]*"
-                  title="Nomor telepon harus berupa 10-13 digit angka"
+                  pattern="^[0-9\-\+\s]+$"
+                  title="Nomor telepon harus berupa angka (dapat mengandung +, -, atau spasi)"
                   required
                 />
                 <Input

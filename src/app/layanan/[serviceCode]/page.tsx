@@ -185,10 +185,10 @@ export default function ServiceRequestFormPage() {
                     handleChange("phone", e.target.value);
                     handleChange("sellerPhone", e.target.value);
                   }}
-                  maxLength={13}
+                  maxLength={20}
                   minLength={10}
-                  pattern="[0-9]*"
-                  title="Nomor telepon harus berupa 10-13 digit angka"
+                  pattern="^[0-9\-\+\s]+$"
+                  title="Nomor telepon harus berupa angka (dapat mengandung +, -, atau spasi)"
                   required
                 />
                 <Input
@@ -259,10 +259,13 @@ export default function ServiceRequestFormPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <Input
                     label="NILAI TRANSAKSI KESEPAKATAN (RP)"
-                    type="number"
-                    min="1000000"
-                    value={formData.transactionPrice || ""}
-                    onChange={(e) => handleChange("transactionPrice", e.target.value)}
+                    type="text"
+                    value={
+                      formData.transactionPrice 
+                        ? formData.transactionPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
+                        : ""
+                    }
+                    onChange={(e) => handleChange("transactionPrice", e.target.value.replace(/\D/g, ""))}
                     required
                   />
                   <Input
@@ -301,20 +304,26 @@ export default function ServiceRequestFormPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <Input
                     label="MODAL DASAR PERSEROAN (RP)"
-                    type="number"
-                    min="50000000" // Batas minimal pembuatan PT sesuai UU PT terbaru (default convention)
-                    placeholder="1000000000"
-                    value={formData.authorizedCapital || ""}
-                    onChange={(e) => handleChange("authorizedCapital", e.target.value)}
+                    type="text"
+                    placeholder="1.000.000.000"
+                    value={
+                      formData.authorizedCapital 
+                        ? formData.authorizedCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
+                        : ""
+                    }
+                    onChange={(e) => handleChange("authorizedCapital", e.target.value.replace(/\D/g, ""))}
                     required
                   />
                   <Input
                     label="MODAL DISETOR / DISETOR AWAL (RP)"
-                    type="number"
-                    min="12500000" // Minimal 25% dari modal dasar 50jt
-                    placeholder="250000000"
-                    value={formData.paidUpCapital || ""}
-                    onChange={(e) => handleChange("paidUpCapital", e.target.value)}
+                    type="text"
+                    placeholder="250.000.000"
+                    value={
+                      formData.paidUpCapital 
+                        ? formData.paidUpCapital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") 
+                        : ""
+                    }
+                    onChange={(e) => handleChange("paidUpCapital", e.target.value.replace(/\D/g, ""))}
                     required
                   />
                 </div>
