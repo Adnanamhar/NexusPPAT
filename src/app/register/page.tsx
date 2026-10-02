@@ -100,7 +100,7 @@ export default function RegisterPage() {
     });
 
     if (!success) {
-      setErrors((prev) => ({ ...prev, general: "Pendaftaran gagal. Periksa kembali data Anda." }));
+      // Error handled by toast in auth context
     }
   };
 
