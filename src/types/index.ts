@@ -19,7 +19,17 @@ export type DocumentType =
   | "surat_kuasa_membebankan_hak_tanggungan"
   | "akta_hibah"
   | "perjanjian_sewa_menyewa"
-  | "akta_pembagian_hak_bersama";
+  | "akta_pembagian_hak_bersama"
+  | "akta_tukar_menukar"
+  | "hak_tanggungan"
+  | "pembagian_hak_bersama"
+  | "pendirian_badan_usaha"
+  | "perubahan_anggaran_dasar"
+  | "perjanjian_umum"
+  | "perjanjian_kawin"
+  | "waris"
+  | "legalisasi"
+  | "surat_kuasa";
 
 export type DocumentStatus =
   | "draft"
@@ -238,3 +248,24 @@ export interface ServiceRequestItem {
 
 export type ExportFormat = "pdf" | "docx" | "txt" | "json";
 
+export type NotificationType =
+  | "document_status"
+  | "payment"
+  | "new_service_request"
+  | "verification"
+  | "deadline_reminder"
+  | "admin_activity";
+
+export interface NotificationItem {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  iconName: string;
+  color: string;
+  href?: string;
+  metadata?: Record<string, any>;
+  isRead: boolean;
+  createdAt: string;
+}

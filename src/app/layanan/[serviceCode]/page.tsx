@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { NOTARY_SERVICES, autoFillServiceForm } from "@/lib/service-templates";
 import { useClientData } from "@/contexts/client-data-context";
 import { useDocuments } from "@/contexts/document-context";
+import { useAuth } from "@/contexts/auth-context";
 import { ServiceCode } from "@/types";
 import {
   ArrowLeft,
@@ -31,6 +32,7 @@ export default function ServiceRequestFormPage() {
 
   const { clientData, createServiceRequest } = useClientData();
   const { createDocument } = useDocuments();
+  const { user } = useAuth();
 
   const serviceInfo = NOTARY_SERVICES.find((s) => s.code === serviceCode) || NOTARY_SERVICES[0];
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -61,54 +63,62 @@ export default function ServiceRequestFormPage() {
         formData
       );
 
-      // Create official document in dashboard database
-      await createDocument({
-        title: `Permohonan: ${serviceInfo.title}`,
-        clientUserId: user?.id || clientData?.userId || "demo-client-user",
-        docType: serviceInfo.code,
-        docTypeLabel: serviceInfo.title,
-        status: "draft_review",
-        statusLabel: "Menunggu Penelaahan Notaris",
-        seller: {
-          fullName: formData.fullName || formData.sellerName || formData.grantorName || formData.husbandName || formData.founder1Name || clientData?.fullName || "",
-          nik: formData.nik || formData.sellerNik || formData.grantorNik || formData.husbandNik || formData.founder1Nik || clientData?.nik || "",
-          registeredAddress: formData.address || formData.sellerAddress || formData.grantorAddress || clientData?.registeredAddress || "",
-          phone: formData.phone || formData.sellerPhone || clientData?.phone || "",
-          email: formData.email || formData.sellerEmail || clientData?.email || "",
-          verificationStatus: "pending"
-        },
-        buyer: {
-          fullName: formData.buyerName || formData.recipientName || formData.wifeName || formData.founder2Name || "",
-          nik: formData.buyerNik || formData.recipientNik || formData.wifeNik || formData.founder2Nik || "",
-          registeredAddress: formData.buyerAddress || formData.recipientAddress || "",
-          phone: "",
-          email: "",
-          verificationStatus: "pending"
-        },
-        property: {
-          certificateType: formData.certificateType || "SHM",
-          certificateNumber: formData.certificateNumber || "",
-          landArea: Number(formData.landArea) || 0,
-          location: formData.location || "",
-          city: formData.city || "",
-          province: formData.province || "",
-          transactionPrice: Number(formData.transactionPrice) || Number(formData.authorizedCapital) || 0,
-        },
-        agreement: {
-          agreementDate: formData.agreementDate || new Date().toISOString().split("T")[0],
-          paymentMethod: formData.paymentMethod || "Belum Ditentukan"
+      // Create official document in dashboard database safely
+      try {
+        await createDocument({
+          title: `Permohonan: ${serviceInfo.title}`,
+          clientUserId: user?.id || clientData?.userId || "demo-client-user",
+          docType: serviceInfo.code,
+          docTypeLabel: serviceInfo.title,
+          status: "draft_review",
+          statusLabel: "Menunggu Penelaahan Notaris",
+          seller: {
+            fullName: formData.fullName || formData.sellerName || formData.grantorName || formData.husbandName || formData.founder1Name || clientData?.fullName || "",
+            nik: formData.nik || formData.sellerNik || formData.grantorNik || formData.husbandNik || formData.founder1Nik || clientData?.nik || "",
+            registeredAddress: formData.address || formData.sellerAddress || formData.grantorAddress || clientData?.registeredAddress || "",
+            phone: formData.phone || formData.sellerPhone || clientData?.phone || "",
+            email: formData.email || formData.sellerEmail || clientData?.email || "",
+            verificationStatus: "pending"
+          },
+          buyer: {
+            fullName: formData.buyerName || formData.recipientName || formData.wifeName || formData.founder2Name || "",
+            nik: formData.buyerNik || formData.recipientNik || formData.wifeNik || formData.founder2Nik || "",
+            registeredAddress: formData.buyerAddress || formData.recipientAddress || "",
+            phone: "",
+            email: "",
+            verificationStatus: "pending"
+          },
+          property: {
+            certificateType: formData.certificateType || "SHM",
+            certificateNumber: formData.certificateNumber || "",
+            landArea: Number(formData.landArea) || 0,
+            location: formData.location || "",
+            city: formData.city || "",
+            province: formData.province || "",
+            transactionPrice: Number(formData.transactionPrice) || Number(formData.authorizedCapital) || 0,
+          },
+          agreement: {
+            agreementDate: formData.agreementDate || new Date().toISOString().split("T")[0],
+            paymentMethod: formData.paymentMethod || "Belum Ditentukan"
+          }
+        });
+      } catch (docErr) {
+        console.warn("createDocument warning:", docErr);
+      }
+
+      try {
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+        } else if (confetti && typeof (confetti as any).default === 'function') {
+          (confetti as any).default({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
         }
-      });
-
-
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+      } catch (e) {
+        console.warn("Confetti error:", e);
+      }
 
       router.push("/layanan");
     } catch (err) {
+      console.error("Submit Error:", err);
       toast.error("Gagal mengirim pengajuan layanan.");
     } finally {
       setIsSubmitting(false);

@@ -19,7 +19,9 @@ import {
   ShieldCheck,
   X,
   Compass,
+  Bell,
 } from "lucide-react";
+import { useNotifications } from "@/contexts/notification-context";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -28,6 +30,7 @@ interface SidebarProps {
 export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { logout, role } = useAuth();
+  const { unreadCount } = useNotifications();
 
   const allNavItems = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["notaris", "admin", "klien"] },
@@ -37,6 +40,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     { label: "Pembayaran", href: "/payments", icon: CreditCard, activeRegex: /^\/payments/, roles: ["notaris", "admin", "klien"] },
     { label: "Laporan & Omset", href: "/reports", icon: BarChart3, activeRegex: /^\/reports/, roles: ["notaris"] },
     { label: "Audit Log", href: "/activities", icon: History, activeRegex: /^\/activities/, roles: ["notaris", "admin"] },
+    { label: "Notifikasi", href: "/notifications", icon: Bell, activeRegex: /^\/notifications/, roles: ["notaris", "admin", "klien"], badge: unreadCount },
     { label: "Pengaturan", href: "/settings", icon: Settings, activeRegex: /^\/settings/, roles: ["notaris", "admin"] },
   ];
 
@@ -114,7 +118,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                           : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                       )}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate flex-1">{item.label}</span>
+                    {item.badge !== undefined && item.badge > 0 && (
+                      <span className="ml-auto bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
                   </div>
                 </Link>
               );

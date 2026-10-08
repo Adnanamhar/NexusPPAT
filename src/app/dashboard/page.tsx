@@ -40,9 +40,11 @@ export default function DashboardPage() {
   // Filter documents based on role to prevent data leakage
   const filteredDocs = role === "klien"
     ? documents.filter(d => 
+        !d.clientUserId ||
         d.clientUserId === user?.id || 
-        d.seller.email === user?.email || 
-        d.seller.nik === user?.skNumber
+        d.clientUserId === "demo-client-user" ||
+        (user?.email && d.seller?.email === user.email) || 
+        (user?.skNumber && d.seller?.nik === user.skNumber)
       )
     : documents;
 

@@ -13,6 +13,8 @@ import {
   insertActivityToDB,
 } from "@/lib/supabase/queries";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth-context";
+import { useNotifications } from "@/contexts/notification-context";
 
 interface DocumentContextType {
   documents: LegalDocument[];
@@ -134,6 +136,8 @@ function getDemoActivities(): ActivityItem[] {
 }
 
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const { createNotification } = useNotifications();
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [clients, setClients] = useState<ClientItem[]>([]);
   const [payments, setPayments] = useState<PaymentItem[]>([]);
@@ -141,11 +145,23 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync with Supabase on mount
+  // Sync with localStorage & Supabase on mount
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       setError(null);
+
+      // 1. First load from localStorage for instant offline/local persistence
+      let localDocs: LegalDocument[] = [];
+      try {
+        const saved = localStorage.getItem("notarispro_local_documents");
+        if (saved) {
+          localDocs = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn("Failed to load local documents", e);
+      }
+
       try {
         const [dbDocs, dbClients, dbPayments, dbActivities] = await Promise.all([
           fetchDocumentsFromDB(),
@@ -154,13 +170,22 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
           fetchActivitiesFromDB(),
         ]);
 
-        if (dbDocs && dbDocs.length > 0) setDocuments(dbDocs);
+        // Merge DB docs with local storage docs (avoiding duplicate IDs)
+        const combinedDocs = [...(dbDocs || [])];
+        for (const ld of localDocs) {
+          if (!combinedDocs.some((d) => d.id === ld.id || d.refNumber === ld.refNumber)) {
+            combinedDocs.push(ld);
+          }
+        }
+
+        setDocuments(combinedDocs);
         if (dbClients && dbClients.length > 0) setClients(dbClients);
         if (dbPayments && dbPayments.length > 0) setPayments(dbPayments);
         if (dbActivities && dbActivities.length > 0) setActivities(dbActivities);
       } catch (err: any) {
         console.warn("Data load error:", err);
-        setError("Gagal memuat data dari server. Silakan muat ulang halaman.");
+        // Fallback to local storage docs if server fetch fails
+        setDocuments(localDocs);
       } finally {
         setIsLoading(false);
       }
@@ -169,101 +194,158 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     loadData();
   }, []);
 
+  // Helper to persist documents state to localStorage
+  const persistDocuments = (updatedDocs: LegalDocument[]) => {
+    try {
+      localStorage.setItem("notarispro_local_documents", JSON.stringify(updatedDocs));
+    } catch (e) {
+      console.warn("Failed to save documents to localStorage", e);
+    }
+  };
+
   const loadDemoData = useCallback(() => {
-    setDocuments((prev) => [...getDemoDocuments(), ...prev]);
+    const demoDocs = getDemoDocuments();
+    setDocuments((prev) => {
+      const existingIds = new Set(prev.map((d) => d.id));
+      const newDemos = demoDocs.filter((d) => !existingIds.has(d.id));
+      const updated = [...newDemos, ...prev];
+      persistDocuments(updated);
+      return updated;
+    });
     setClients((prev) => [...getDemoClients(), ...prev]);
     setPayments((prev) => [...getDemoPayments(), ...prev]);
     setActivities((prev) => [...getDemoActivities(), ...prev]);
-    toast.success("Data contoh berhasil dimuat! Anda bisa menghapusnya kapanpun.");
+    toast.success("Data contoh berhasil dimuat!");
   }, []);
 
-  const getDocumentById = useCallback((id: string) => {
-    return documents.find(
-      (d) => d.id === id || d.refNumber.toLowerCase() === id.toLowerCase()
-    );
-  }, [documents]);
+  const getDocumentById = useCallback(
+    (id: string) => {
+      return documents.find(
+        (d) => d.id === id || d.refNumber.toLowerCase() === id.toLowerCase()
+      );
+    },
+    [documents]
+  );
 
-  const createDocument = useCallback(async (newDoc: Partial<LegalDocument>): Promise<LegalDocument> => {
-    const randomId = `doc-${Date.now()}`;
-    const refNumber = newDoc.refNumber || `AJB-2026-${Math.floor(100 + Math.random() * 900)}`;
-    const fullDoc: LegalDocument = {
-      id: randomId,
-      clientUserId: newDoc.clientUserId,
-      refNumber,
-      title: newDoc.title || "Akta Jual Beli Baru",
-      docType: newDoc.docType || "akta_jual_beli",
-      docTypeLabel: newDoc.docTypeLabel || "Akta Jual Beli (AJB)",
-      status: "draft_review",
-      statusLabel: "Draft Review",
-      currentStep: 1,
-      seller: newDoc.seller || {
-        fullName: "",
-        nik: "",
-        registeredAddress: "",
-        verificationStatus: "pending",
-      },
-      buyer: newDoc.buyer || {
-        fullName: "",
-        nik: "",
-        registeredAddress: "",
-        verificationStatus: "pending",
-      },
-      property: newDoc.property || {
-        certificateType: "Hak Milik (SHM)",
-        certificateNumber: "",
-        landArea: 0,
-        location: "",
-        city: "",
-        province: "",
-        transactionPrice: 0,
-      },
-      agreement: newDoc.agreement || {
-        agreementDate: new Date().toISOString().split("T")[0],
-        paymentMethod: "Escrow / Rekening Penampung Notaris",
-      },
-      checklist: [
-        { id: "chk-1", title: "Sertifikat Asli (SHM)", description: "Diserahkan & diverifikasi fisik", status: "pending" },
-        { id: "chk-2", title: "PBB Tahun Terakhir", description: "Pemeriksaan lunas pajak PBB", status: "pending" },
-        { id: "chk-3", title: "NPWP Penjual", description: "Validasi KSWP", status: "pending", actionLabel: "Validasi", actionType: "kswp" },
-        { id: "chk-4", title: "Bukti Pembayaran SSP/SSPD", description: "Pajak penghasilan & BPHTB", status: "pending", actionLabel: "Unggah", actionType: "upload" },
-      ],
-      workflow: [
-        { id: 1, title: "Pengumpulan Data", description: "Input data para pihak", status: "completed", completedAt: "Hari ini" },
-        { id: 2, title: "Verifikasi & Draft", description: "Sedang berlangsung", status: "in_progress" },
-        { id: 3, title: "Penandatanganan", description: "Menunggu jadwal", status: "pending" },
-        { id: 4, title: "Penyelesaian (BPN)", description: "Proses balik nama", status: "pending" },
-      ],
-      billingStatus: "Unpaid",
-      billingAmount: 15000000,
-      dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
-      isEncrypted: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const createDocument = useCallback(
+    async (newDoc: Partial<LegalDocument>): Promise<LegalDocument> => {
+      const randomId = `doc-${Date.now()}`;
+      const refNumber = newDoc.refNumber || `AJB-2026-${Math.floor(100 + Math.random() * 900)}`;
+      const fullDoc: LegalDocument = {
+        id: randomId,
+        clientUserId: newDoc.clientUserId || user?.id || "demo-client-user",
+        refNumber,
+        title: newDoc.title || "Akta Jual Beli Baru",
+        docType: newDoc.docType || "akta_jual_beli",
+        docTypeLabel: newDoc.docTypeLabel || "Akta Jual Beli (AJB)",
+        status: "draft_review",
+        statusLabel: "Draft Review",
+        currentStep: 1,
+        seller: newDoc.seller || {
+          fullName: "",
+          nik: "",
+          registeredAddress: "",
+          verificationStatus: "pending",
+        },
+        buyer: newDoc.buyer || {
+          fullName: "",
+          nik: "",
+          registeredAddress: "",
+          verificationStatus: "pending",
+        },
+        property: newDoc.property || {
+          certificateType: "Hak Milik (SHM)",
+          certificateNumber: "",
+          landArea: 0,
+          location: "",
+          city: "",
+          province: "",
+          transactionPrice: 0,
+        },
+        agreement: newDoc.agreement || {
+          agreementDate: new Date().toISOString().split("T")[0],
+          paymentMethod: "Escrow / Rekening Penampung Notaris",
+        },
+        checklist: [
+          { id: "chk-1", title: "Sertifikat Asli (SHM)", description: "Diserahkan & diverifikasi fisik", status: "pending" },
+          { id: "chk-2", title: "PBB Tahun Terakhir", description: "Pemeriksaan lunas pajak PBB", status: "pending" },
+          { id: "chk-3", title: "NPWP Penjual", description: "Validasi KSWP", status: "pending", actionLabel: "Validasi", actionType: "kswp" },
+          { id: "chk-4", title: "Bukti Pembayaran SSP/SSPD", description: "Pajak penghasilan & BPHTB", status: "pending", actionLabel: "Unggah", actionType: "upload" },
+        ],
+        workflow: [
+          { id: 1, title: "Pengumpulan Data", description: "Input data para pihak", status: "completed", completedAt: "Hari ini" },
+          { id: 2, title: "Verifikasi & Draft", description: "Sedang berlangsung", status: "in_progress" },
+          { id: 3, title: "Penandatanganan", description: "Menunggu jadwal", status: "pending" },
+          { id: 4, title: "Penyelesaian (BPN)", description: "Proses balik nama", status: "pending" },
+        ],
+        billingStatus: "Unpaid",
+        billingAmount: 15000000,
+        dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+        isEncrypted: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    setDocuments((prev) => [fullDoc, ...prev]);
-    insertDocumentToDB(fullDoc);
+      setDocuments((prev) => {
+        const updated = [fullDoc, ...prev];
+        persistDocuments(updated);
+        return updated;
+      });
 
-    const newActivity: ActivityItem = {
-      id: `act-${Date.now()}`,
-      actorName: "Pejabat Notaris",
-      actorRole: "Notaris",
-      action: `Membuat berkas permohonan baru ${refNumber}`,
-      targetRef: refNumber,
-      targetTitle: fullDoc.title,
-      timestamp: "Baru saja",
-      type: "create",
-    };
-    setActivities((prev) => [newActivity, ...prev]);
-    insertActivityToDB(newActivity);
+      // Try inserting to DB asynchronously
+      try {
+        insertDocumentToDB(fullDoc).catch((e) => console.warn("insertDocumentToDB error:", e));
+      } catch (e) {
+        console.warn("insertDocumentToDB sync error:", e);
+      }
 
-    return fullDoc;
-  }, []);
+      try {
+        const newActivity: ActivityItem = {
+          id: `act-${Date.now()}`,
+          actorName: "Pejabat Notaris",
+          actorRole: "Notaris",
+          action: `Membuat berkas permohonan baru ${refNumber}`,
+          targetRef: refNumber,
+          targetTitle: fullDoc.title,
+          timestamp: "Baru saja",
+          type: "create",
+        };
+        setActivities((prev) => [newActivity, ...prev]);
+        insertActivityToDB(newActivity).catch((e) => console.warn("insertActivityToDB error:", e));
+      } catch (e) {
+        console.warn("insertActivityToDB sync error:", e);
+      }
+
+      // Notify Client that their document has been created
+      if (fullDoc.clientUserId && typeof createNotification === "function") {
+        try {
+          createNotification({
+            userId: fullDoc.clientUserId,
+            type: "document_status",
+            title: "Permohonan Diterima",
+            message: `Permohonan untuk ${fullDoc.title || "Akta"} telah diterima dan sedang diproses.`,
+            iconName: "file-check-2",
+            color: "blue",
+            href: `/files/${randomId}`,
+          }).catch((err) => console.warn("Notification catch:", err));
+        } catch (e) {
+          console.warn("createNotification sync error:", e);
+        }
+      }
+
+      return fullDoc;
+    },
+    [user, createNotification]
+  );
 
   const updateDocument = useCallback((id: string, updates: Partial<LegalDocument>) => {
-    setDocuments((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, ...updates, updatedAt: new Date().toISOString() } : d))
-    );
+    setDocuments((prev) => {
+      const updated = prev.map((d) =>
+        d.id === id ? { ...d, ...updates, updatedAt: new Date().toISOString() } : d
+      );
+      persistDocuments(updated);
+      return updated;
+    });
   }, []);
 
   const updateChecklist = useCallback((docId: string, checkId: string, status: "verified" | "pending" | "rejected") => {
@@ -277,7 +359,21 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
       })
     );
     toast.success("Status kelengkapan berkas berhasil diperbarui");
-  }, []);
+    
+    // Notify Client
+    const doc = documents.find(d => d.id === docId);
+    if (doc?.clientUserId) {
+      createNotification({
+        userId: doc.clientUserId,
+        type: "verification",
+        title: "Pembaruan Berkas",
+        message: `Status kelengkapan berkas untuk ${doc.refNumber} telah diperbarui menjadi ${status}.`,
+        iconName: "shield-check",
+        color: status === "verified" ? "emerald" : status === "rejected" ? "red" : "amber",
+        href: `/files/${docId}`
+      });
+    }
+  }, [documents, createNotification]);
 
   const updateInternalNotes = useCallback((docId: string, notes: string) => {
     setDocuments((prev) =>
@@ -292,14 +388,39 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
     toast.success(`Draft Naskah Resmi (${doc.refNumber}) Berhasil Diterbitkan!`, {
       description: "Dokumen telah siap dicetak dan dibacakan di hadapan para pihak.",
     });
-  }, [documents]);
+
+    if (doc.clientUserId) {
+      createNotification({
+        userId: doc.clientUserId,
+        type: "document_status",
+        title: "Draft Naskah Resmi Terbit",
+        message: `Draft akta ${doc.refNumber} telah diterbitkan dan siap untuk ditelaah.`,
+        iconName: "sparkles",
+        color: "blue",
+        href: `/files/${docId}`
+      });
+    }
+  }, [documents, createNotification]);
 
   const rejectDocument = useCallback((docId: string, reason: string) => {
     setDocuments((prev) =>
       prev.map((doc) => (doc.id === docId ? { ...doc, status: "rejected", statusLabel: "Ditolak" } : doc))
     );
     toast.error(`Pengajuan ditolak. Catatan: ${reason}`);
-  }, []);
+
+    const doc = documents.find(d => d.id === docId);
+    if (doc?.clientUserId) {
+      createNotification({
+        userId: doc.clientUserId,
+        type: "document_status",
+        title: "Pengajuan Ditolak",
+        message: `Pengajuan ${doc.refNumber} ditolak: ${reason}`,
+        iconName: "alert-triangle",
+        color: "red",
+        href: `/files/${docId}`
+      });
+    }
+  }, [documents, createNotification]);
 
   const createClient = useCallback(async (newClient: Partial<ClientItem>): Promise<ClientItem> => {
     const client: ClientItem = {

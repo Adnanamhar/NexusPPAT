@@ -1,5 +1,5 @@
 import { createClient } from "./client";
-import { LegalDocument, ClientItem, PaymentItem, ActivityItem, UserProfile } from "@/types";
+import { LegalDocument, ClientItem, PaymentItem, ActivityItem, UserProfile, NotificationItem, NotificationType } from "@/types";
 
 const supabase = createClient();
 
@@ -390,5 +390,133 @@ export async function uploadFileToSupabase(file: File, folder: string = "uploads
   } catch (err) {
     console.error("uploadFileToSupabase exception:", err);
     return null;
+  }
+}
+
+// ==============================================================================
+// 6. NOTIFICATIONS CRUD
+// ==============================================================================
+
+export async function fetchNotificationsFromDB(userId: string): Promise<NotificationItem[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) return null;
+    if (!data) return [];
+
+    return data.map((n: any) => ({
+      id: n.id,
+      userId: n.user_id,
+      type: n.type as NotificationType,
+      title: n.title,
+      message: n.message,
+      iconName: n.icon_name,
+      color: n.color,
+      href: n.href,
+      metadata: n.metadata,
+      isRead: n.is_read,
+      createdAt: n.created_at,
+    }));
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function insertNotificationToDB(notif: {
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  iconName?: string;
+  color?: string;
+  href?: string;
+  metadata?: Record<string, any>;
+}): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("notifications").insert({
+      user_id: notif.userId,
+      type: notif.type,
+      title: notif.title,
+      message: notif.message,
+      icon_name: notif.iconName || "bell",
+      color: notif.color || "blue",
+      href: notif.href,
+      metadata: notif.metadata || {},
+      is_read: false,
+    });
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function insertBulkNotificationsToDB(notifs: Array<{
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  iconName?: string;
+  color?: string;
+  href?: string;
+  metadata?: Record<string, any>;
+}>): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("notifications").insert(
+      notifs.map(notif => ({
+        user_id: notif.userId,
+        type: notif.type,
+        title: notif.title,
+        message: notif.message,
+        icon_name: notif.iconName || "bell",
+        color: notif.color || "blue",
+        href: notif.href,
+        metadata: notif.metadata || {},
+        is_read: false,
+      }))
+    );
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function markNotificationReadInDB(notifId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", notifId);
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function markAllNotificationsReadInDB(userId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", userId)
+      .eq("is_read", false);
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function deleteNotificationFromDB(notifId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notifId);
+    return !error;
+  } catch (err) {
+    return false;
   }
 }

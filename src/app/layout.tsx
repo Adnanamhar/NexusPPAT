@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { AuthProvider } from "@/contexts/auth-context";
 import { DocumentProvider } from "@/contexts/document-context";
 import { ClientDataProvider } from "@/contexts/client-data-context";
+import { NotificationProvider } from "@/contexts/notification-context";
 import { Toaster } from "sonner";
 
 const jakartaSans = Plus_Jakarta_Sans({
@@ -28,12 +29,14 @@ export default function RootLayout({
       <body className={`${jakartaSans.variable} font-sans antialiased min-h-screen selection:bg-blue-600 selection:text-white transition-colors duration-200`}>
         <ThemeProvider>
           <AuthProvider>
-            <DocumentProvider>
-              <ClientDataProvider>
-                {children}
-                <Toaster position="top-right" richColors closeButton />
-              </ClientDataProvider>
-            </DocumentProvider>
+            <NotificationProvider>
+              <DocumentProvider>
+                <ClientDataProvider>
+                  {children}
+                  <Toaster position="top-right" richColors closeButton />
+                </ClientDataProvider>
+              </DocumentProvider>
+            </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

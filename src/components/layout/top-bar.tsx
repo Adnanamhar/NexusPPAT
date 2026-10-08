@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { useTheme } from "@/contexts/theme-context";
-import { useDocuments } from "@/contexts/document-context";
+import { useNotifications } from "@/contexts/notification-context";
 import { formatDistanceToNow, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import {
@@ -18,7 +18,22 @@ import {
   AlertTriangle,
   CreditCard,
   Plus,
+  FileCheck2,
+  Sparkles,
+  ShieldCheck,
+  Clock,
+  Check
 } from "lucide-react";
+
+const iconMap: Record<string, any> = {
+  "bell": Bell,
+  "alert-triangle": AlertTriangle,
+  "credit-card": CreditCard,
+  "file-check-2": FileCheck2,
+  "sparkles": Sparkles,
+  "shield-check": ShieldCheck,
+  "clock": Clock
+};
 
 interface TopBarProps {
   onToggleSidebar?: () => void;
@@ -28,7 +43,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { documents, payments } = useDocuments();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,84 +63,6 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
   const formattedDate = useMemo(() => {
     return format(new Date(), "EEEE, d MMMM yyyy", { locale: idLocale });
   }, []);
-
-  const notifications = useMemo(() => {
-    const notifs: any[] = [];
-    
-    // Filter by role to prevent data leakage in notifications
-    const myDocuments = role === "klien" 
-      ? documents.filter(d => d.clientUserId === user?.id || d.seller.email === user?.email || d.seller.nik === user?.skNumber) 
-      : documents;
-      
-    const myPayments = role === "klien"
-      ? payments.filter(p => myDocuments.some(d => d.refNumber === p.documentRef))
-      : payments;
-
-    myDocuments.forEach((doc) => {
-      if (doc.status === "awaiting_docs") {
-        notifs.push({
-          id: `doc-aw-${doc.id}`,
-          title: "Kelengkapan Berkas",
-          message: `Akta ${doc.refNumber} (${doc.title}) menunggu upload berkas/KTP.`,
-          icon: AlertTriangle,
-          color: "text-amber-500",
-          bg: "bg-amber-50 dark:bg-amber-500/10",
-          time: new Date(doc.updatedAt),
-          href: `/files/${doc.id}`,
-        });
-      } else if (doc.status === "draft_review") {
-        notifs.push({
-          id: `doc-dr-${doc.id}`,
-          title: "Penelaahan Naskah",
-          message: `Draft akta ${doc.refNumber} baru diajukan dan menunggu review Anda.`,
-          icon: Bell,
-          color: "text-blue-500",
-          bg: "bg-blue-50 dark:bg-blue-500/10",
-          time: new Date(doc.createdAt),
-          href: `/files/${doc.id}`,
-        });
-      } else if (doc.status === "signature_pending") {
-        notifs.push({
-          id: `doc-sg-${doc.id}`,
-          title: "Jadwal Tanda Tangan",
-          message: `Akta ${doc.refNumber} siap ditandatangani. Segera jadwalkan pertemuan.`,
-          icon: AlertTriangle,
-          color: "text-purple-500",
-          bg: "bg-purple-50 dark:bg-purple-500/10",
-          time: new Date(doc.updatedAt),
-          href: `/files/${doc.id}`,
-        });
-      } else if (doc.status === "completed") {
-        notifs.push({
-          id: `doc-cm-${doc.id}`,
-          title: "Akta Selesai",
-          message: `Proses akta ${doc.refNumber} telah selesai seutuhnya.`,
-          icon: Bell,
-          color: "text-emerald-500",
-          bg: "bg-emerald-50 dark:bg-emerald-500/10",
-          time: new Date(doc.updatedAt),
-          href: `/files/${doc.id}`,
-        });
-      }
-    });
-
-    myPayments.forEach((payment) => {
-      if (payment.status === "Unpaid") {
-        notifs.push({
-          id: `pay-${payment.id}`,
-          title: "Menunggu Pembayaran",
-          message: `Invoice ${payment.invoiceNumber} (Rp ${payment.amount.toLocaleString("id-ID")}) belum dibayar.`,
-          icon: CreditCard,
-          color: "text-red-500",
-          bg: "bg-red-50 dark:bg-red-500/10",
-          time: new Date(payment.paidAt || payment.dueDate || Date.now() - 3600000),
-          href: `/payments`,
-        });
-      }
-    });
-
-    return notifs.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 10);
-  }, [documents, payments]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,8 +141,10 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
             title="Notifikasi"
           >
             <Bell className="w-4 h-4" />
-            {notifications.length > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-red-500 rounded-full border-2 border-white dark:border-[#070c18] min-w-[18px]">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
           </button>
 
@@ -217,9 +156,9 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
                     Notifikasi Terbaru
                   </h4>
-                  {notifications.length > 0 && (
+                  {unreadCount > 0 && (
                     <span className="text-[10px] bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold">
-                      {notifications.length} Baru
+                      {unreadCount} Baru
                     </span>
                   )}
                 </div>
@@ -230,31 +169,40 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {notifications.map((notif) => {
-                      const Icon = notif.icon;
+                    {notifications.slice(0, 10).map((notif) => {
+                      const Icon = iconMap[notif.iconName] || Bell;
+                      const bgClass = notif.isRead ? "bg-transparent" : "bg-blue-50/50 dark:bg-blue-900/10";
+                      const colorName = notif.color || "blue";
                       return (
-                        <Link key={notif.id} href={notif.href} onClick={() => setShowNotifications(false)}>
-                          <div className="flex gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                            <div className={`w-8 h-8 rounded-full flex shrink-0 items-center justify-center ${notif.bg} ${notif.color}`}>
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1 space-y-0.5">
-                              <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                {notif.title}
-                              </p>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                                {notif.message}
-                              </p>
-                              <p className="text-[9px] text-slate-400 dark:text-slate-500 pt-1">
-                                {formatDistanceToNow(notif.time, { addSuffix: true, locale: idLocale })}
-                              </p>
-                            </div>
+                        <div key={notif.id} className={`flex gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group border border-transparent hover:border-slate-200 dark:hover:border-slate-700 ${bgClass}`}>
+                          <div className={`w-8 h-8 rounded-full flex shrink-0 items-center justify-center bg-${colorName}-100 dark:bg-${colorName}-900/30 text-${colorName}-600 dark:text-${colorName}-400`}>
+                            <Icon className="w-4 h-4" />
                           </div>
-                        </Link>
+                          <div className="flex-1 space-y-0.5 cursor-pointer" onClick={() => { if(!notif.isRead) markAsRead(notif.id); if(notif.href) router.push(notif.href); setShowNotifications(false); }}>
+                            <p className={`text-xs text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ${notif.isRead ? 'font-medium' : 'font-bold'}`}>
+                              {notif.title}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                              {notif.message}
+                            </p>
+                            <p className="text-[9px] text-slate-400 dark:text-slate-500 pt-1">
+                              {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: idLocale })}
+                            </p>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
                 )}
+                
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
+                  <button onClick={markAllAsRead} className="text-xs text-center font-semibold text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    ✓ Tandai Semua Dibaca
+                  </button>
+                  <Link href="/notifications" onClick={() => setShowNotifications(false)} className="text-xs text-center font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                    → Lihat Semua Notifikasi
+                  </Link>
+                </div>
               </div>
             </>
           )}

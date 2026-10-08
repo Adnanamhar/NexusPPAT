@@ -195,3 +195,53 @@ CREATE POLICY "Allow all access on clients" ON public.clients FOR ALL USING (tru
 CREATE POLICY "Allow all access on payments" ON public.payments FOR ALL USING (true);
 CREATE POLICY "Allow all access on activities" ON public.activities FOR ALL USING (true);
 CREATE POLICY "Allow all access on office_settings" ON public.office_settings FOR ALL USING (true);
+
+-- 9. Notifications Table
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL CHECK (type IN (
+    'document_status',
+    'payment',
+    'new_service_request',
+    'verification',
+    'deadline_reminder',
+    'admin_activity'
+  )),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  icon_name TEXT DEFAULT 'bell',
+  color TEXT DEFAULT 'blue',
+  href TEXT,                          -- Link tujuan saat notifikasi di-klik
+  metadata JSONB DEFAULT '{}',       -- Data tambahan (doc_id, ref_number, dll)
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for fast queries
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(user_id, is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
+
+-- Enable RLS
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own notifications
+CREATE POLICY "Users can view own notifications"
+  ON public.notifications FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "System can insert notifications"
+  ON public.notifications FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Users can update own notifications"
+  ON public.notifications FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own notifications"
+  ON public.notifications FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Enable Supabase Realtime on notifications table
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
