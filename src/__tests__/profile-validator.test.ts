@@ -121,9 +121,9 @@ describe("Fitur #8: validateLegalAge & autoFillPartyFromProfile (Profil & Auto-F
 
   // TC-08: Auto-fill ditolak jika data primer (NIK atau alamat) tidak lengkap
   it("TC-08 [Auto-Fill/Negatif]: menolak auto-fill jika NIK bukan 16 digit atau alamat kosong", () => {
-    // Arrange: Profil tanpa NIK 16 digit
+    // Arrange: Profil tanpa NIK 16 digit dan nama kosong
     const incompleteProfile: Partial<ClientProfileData> = {
-      fullName: "Budi Santoso",
+      fullName: "   ",
       nik: "12345", // Cacat
       registeredAddress: "  ",
     };
@@ -133,7 +133,21 @@ describe("Fitur #8: validateLegalAge & autoFillPartyFromProfile (Profil & Auto-F
 
     // Assert
     expect(result.isSuccess).toBe(false);
+    expect(result.missingFields).toContain("fullName");
     expect(result.missingFields).toContain("nik");
     expect(result.missingFields).toContain("registeredAddress");
+  });
+
+  // TC-09: Ulang tahun belum lewat dalam tahun berjalan
+  it("TC-09 [Kalkulasi Usia]: mengurangi usia 1 tahun jika tanggal lahir belum tiba di tahun berjalan", () => {
+    // Arrange: Lahir 2000-08-20, acuan 2026-01-01 -> usia 25 (bukan 26)
+    const birthDate = "2000-08-20";
+
+    // Act
+    const result = validateLegalAge(birthDate, refDate);
+
+    // Assert
+    expect(result.isLegallyCapable).toBe(true);
+    expect(result.calculatedAge).toBe(25);
   });
 });
