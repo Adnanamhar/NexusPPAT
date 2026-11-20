@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -32,6 +34,9 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
-    "typescript": "5.9.3"
+    "@vitest/coverage-v8": "^5.1.1",
+    "puppeteer-core": "^25.17.0",
+    "typescript": "5.9.3",
+    "vitest": "^5.1.1"
   }
 }
